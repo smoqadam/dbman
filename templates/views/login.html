@@ -1,0 +1,9 @@
+{{define "content"}}
+ {{.}}
+    <form action="/login" method="post">
+        <input type="text" placeholder="host" name="host" /> <br>
+        <input type="text" name="username" id="username" placeholder="Username"> <br>
+        <input type="password" name="password" placeholder="password"> <br>
+        <input type="submit" value="Connect" />
+    </form>
+{{ end }}

@@ -1,0 +1,7 @@
+{{ define "content" }}
+    <ul>
+        {{ range $db := . }}
+            <li><a href="/db/{{$db}}">{{$db}}</a></li>
+        {{ end }}
+    </ul>
+{{ end }}
