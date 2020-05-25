@@ -2,13 +2,17 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
 func (app *App) home(w http.ResponseWriter, r *http.Request) {
-	app.html(w, "views/login.html", nil)
+	data := map[string]interface{}{
+		"test": "test",
+	}
+	app.html(w, "views/login.html", data)
 }
 
 func (app *App) login(w http.ResponseWriter, r *http.Request) {
@@ -33,26 +37,54 @@ func (app *App) login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *App) dblist(w http.ResponseWriter, r *http.Request) {
-	app.html(w, "views/databases.html", app.db.DbList(app.Conn))
+	log.Println("DB", app.db.DB())
+	log.Println("DB", app.Conn)
+	dbs, err := app.db.Databases()
+	if err != nil {
+		panic(err)
+	}
+	app.html(w, "views/databases.html", dbs)
 }
 
 func (app *App) tablelist(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	fmt.Println("db: ", vars["db"])
+	tables, err := app.db.Tables(vars["db"])
+	if err != nil {
+		panic(err)
+	}
 	data := map[string]interface{}{
 		"Db":     vars["db"],
-		"Tables": app.db.TableList(vars["db"], app.Conn),
+		"Tables": tables,
 	}
-	fmt.Println(data)
 	app.html(w, "views/table/list.html", data)
 }
 
 func (app *App) table(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+
+	fmt.Println("TABLE")
+	cols, err := app.db.Columns(vars["db"], vars["table"])
+	if err != nil {
+		panic(err)
+	}
+
+	data := map[string]interface{}{
+		"DbName":  vars["db"],
+		"Table":   vars["table"],
+		"Columns": cols,
+	}
+	app.html(w, "views/table/structure.html", data)
+}
+
+func (app *App) data(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	rows, _ := app.db.Query(vars["db"], "select * from "+vars["table"])
+	fmt.Println(rows)
 	data := map[string]interface{}{
 		"DbName": vars["db"],
 		"Table":  vars["table"],
-		"Rows":   app.db.Describe(vars["db"], vars["table"], app.Conn),
+		"rows":   rows,
 	}
-	app.html(w, "views/table/structure.html", data)
+	app.html(w, "views/table/data.html", data)
 }

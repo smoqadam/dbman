@@ -1,7 +1,28 @@
+{{ define "sidebar" }}
+<div class="col-md-2">
+    Databases
+</div>
+{{ end }}
+
 {{ define "content" }}
-    <ul>
-        {{ range $table := .Tables }}
-            <li><a href="/table/{{ $.Db }}/{{$table}}">{{$table}}</a></li>
-        {{ end }}
-    </ul>
+<div class="col-md-10">
+    <h5 class="page-header">Database: <strong>{{.Db}}</strong></h5>
+    <table class="table  table-striped table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>Table</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            {{ range $table := .Tables }}
+            <tr>
+                <td><a href="/table/{{ $.Db }}/{{$table.Name}}">{{$table.Name}}</a></td>
+                <td>{{$table.Engine}}</td>
+            </tr>
+            {{ end }}
+        </tbody>
+    </table>
+</div>
 {{ end }}

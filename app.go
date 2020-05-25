@@ -16,6 +16,7 @@ import (
 var (
 	cookieName   = "user"
 	cookieSecret = []byte("secret")
+	dbp          *sql.DB
 )
 
 type App struct {
@@ -72,15 +73,15 @@ func (app *App) connect(s string, h string, u string, p string) error {
 	switch s {
 	case "mysql":
 		conn := fmt.Sprintf("%s:%s@tcp(%s)/?", u, p, h)
-		fmt.Println(conn)
 		db, err := sql.Open("mysql", conn)
 		if err != nil {
 			return err
 		}
-		d := &Mysql{}
-
-		app.db = d
+		database := &Mysql{}
+		database.SetDB(db)
 		app.Conn = db
+		app.db = database
+		dbp = db
 	}
 	return nil
 }
@@ -108,7 +109,6 @@ func (app *App) conn(next http.Handler) http.Handler {
 		pass := session.Values["pass"]
 
 		err := app.connect("mysql", host.(string), user.(string), pass.(string))
-		log.Println("err", err)
 		if err != nil {
 			http.Redirect(w, r, "/login", 302)
 		} else {

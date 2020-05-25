@@ -1,26 +1,49 @@
+{{ define "sidebar" }}
+<div class="col-md-2">
+    list of other tables
+</div>
+{{ end }}
+
 {{ define "content" }}
 
-    <table>
-        <thead>
-            <tr>
-                <th>Field</th>
-                <th>Type</th>
-                <th>Null</th>
-                <th>Key</th>
-                <th>Default</th>
-                <th>Extra</th>
-            </tr>
-        </thead>
-        {{ range $row := .Rows}}
-            <tr>
-                <td>{{$row.Field | ToString}}</td>
-                <td>{{$row.Type | ToString}}</td>
-                <td>{{$row.Null | ToString}}</td>
-                <td>{{$row.Key | ToString}}</td>
-                <td>{{$row.Default | ToString}}</td>
-                <td>{{$row.Extra | ToString}}</td>
-            </tr>
-        {{ end }}
-    </table>
+<div class="col-md-10">
 
+    <h5 class="page-header">Tabel: <strong>{{.Table}}</strong></h5>
+
+    <ul class="nav nav-tabs nav-fill">
+        <li class="nav-item">
+          <a class="nav-link active" href="#"><strong>Structure</strong></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/table/{{.DbName}}/{{.Table}}/data">Browse</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Operation</a>
+        </li>
+    </ul>
+    <div class="tab-content p-3" id="nav-tabContent">
+        <table class="table  table-striped table-bordered" >
+            <thead class="thead-dark">
+                <tr>
+                    <th>Field</th>
+                    <th>Type</th>
+                    <th>Null</th>
+                    <th>Key</th>
+                    <th>Default</th>
+                    <th>Extra</th>
+                </tr>
+            </thead>
+            {{ range $row := .Columns}}
+                <tr>
+                    <td>{{$row.Field | ToString}}</td>
+                    <td>{{$row.Type | ToString}}</td>
+                    <td>{{$row.Null | ToString}}</td>
+                    <td>{{$row.Key | ToString}}</td>
+                    <td>{{$row.Default | ToString}}</td>
+                    <td>{{$row.Extra | ToString}}</td>
+                </tr>
+            {{ end }}
+        </table>
+    </div>
+</div>
 {{ end }}
