@@ -21,7 +21,9 @@ type Database interface {
 	// sql.DB then return an array of Columns
 	Columns(string, string) ([]Column, error)
 
-	Query(string, string) (Rows, error)
+	Query(string, string, ...interface{}) (*sql.Rows, error)
+
+	Data(string, string, ...interface{}) (Rows, error)
 }
 
 type Column struct {
@@ -44,6 +46,8 @@ type Rows struct {
 	Values []Row
 }
 
-type Row struct {
-	Values []string
-}
+type Row []string
+
+// type Row struct {
+// 	Values []string
+// }

@@ -16,15 +16,15 @@
 </head>
 
 <body>
-    {{ template "header" .}}
+    <header class="header">
+        HEADER
+    </header>
     <div class="container mt-4">
         <div class="row">
-                {{ template "sidebar" .}}
-                {{ template "content" .}}
+            {{ template "content" .}}
         </div>
     </div>
     <footer class="page-footer font-small blue pt-4 text-center" style="position: absolute; bottom: 0">
-        {{ template "footer" .}}
     </footer>
 </body>
 

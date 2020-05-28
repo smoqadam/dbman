@@ -22,7 +22,7 @@
         </li>
     </ul>
     <div class="tab-content p-3" id="nav-tabContent">
-        <table class="table  table-striped table-bordered" >
+        <table class="table  table-striped table-bordered table-responsive" >
             <thead class="thead-dark">
                 <tr>
                     {{ range $fields := .rows.Fields}}
@@ -33,13 +33,13 @@
             <tbody>
                 {{ range $row := .rows.Values }}
                 <tr>
-                    {{ range $r := $row.Values }}
+                    {{ range $r := $row }}
                         <td>{{ . }}</td>
                     {{ end }}
+                </tr>
                 {{ end }}
-            </tr>
-        </tbody>
-    </table>
+            </tbody>
+        </table>
     </div>
 </div>
 {{ end }}

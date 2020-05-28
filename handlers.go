@@ -12,7 +12,7 @@ func (app *App) home(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"test": "test",
 	}
-	app.html(w, "views/login.html", data)
+	app.Response.html(w, "views/login.html", data)
 }
 
 func (app *App) login(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +43,7 @@ func (app *App) dblist(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	app.html(w, "views/databases.html", dbs)
+	app.Response.html(w, "views/databases.html", dbs)
 }
 
 func (app *App) tablelist(w http.ResponseWriter, r *http.Request) {
@@ -56,7 +56,7 @@ func (app *App) tablelist(w http.ResponseWriter, r *http.Request) {
 		"Db":     vars["db"],
 		"Tables": tables,
 	}
-	app.html(w, "views/table/list.html", data)
+	app.Response.html(w, "views/table/list.html", data)
 }
 
 func (app *App) table(w http.ResponseWriter, r *http.Request) {
@@ -73,18 +73,20 @@ func (app *App) table(w http.ResponseWriter, r *http.Request) {
 		"Table":   vars["table"],
 		"Columns": cols,
 	}
-	app.html(w, "views/table/structure.html", data)
+	app.Response.html(w, "views/table/structure.html", data)
 }
 
 func (app *App) data(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
-	rows, _ := app.db.Query(vars["db"], "select * from "+vars["table"])
-	fmt.Println(rows)
+	rows, err := app.db.Data(vars["db"], "select * from "+vars["table"])
+	if err != nil {
+		panic(err)
+	}
 	data := map[string]interface{}{
 		"DbName": vars["db"],
 		"Table":  vars["table"],
 		"rows":   rows,
 	}
-	app.html(w, "views/table/data.html", data)
+	app.Response.html(w, "views/table/data.html", data)
 }

@@ -2,13 +2,9 @@ package main
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
-	"path"
-	"strconv"
 
 	"github.com/gorilla/sessions"
 )
@@ -20,53 +16,17 @@ var (
 )
 
 type App struct {
-	db     Database
-	Conn   *sql.DB
-	cookie *sessions.CookieStore
+	db       Database
+	Conn     *sql.DB
+	cookie   *sessions.CookieStore
+	Response *Response
 }
 
 func NewApp() *App {
 	return &App{
-		cookie: sessions.NewCookieStore(cookieSecret),
+		Response: &Response{},
+		cookie:   sessions.NewCookieStore(cookieSecret),
 	}
-}
-
-func (app *App) json(w http.ResponseWriter, out interface{}) {
-	w.Header().Add("Content-Type", "application/json")
-	res, _ := json.Marshal(out)
-	w.Write(res)
-}
-
-func ToString(value interface{}) string {
-	switch v := value.(type) {
-	case string:
-		return v
-	case []byte:
-		return string(v)
-	case int:
-		return strconv.Itoa(v)
-	// Add whatever other types you need
-	default:
-		return ""
-	}
-}
-
-func (app *App) html(w http.ResponseWriter, file string, data interface{}) {
-	base := path.Join("templates", "base.html")
-	header := path.Join("templates", "header.html")
-	footer := path.Join("templates", "footer.html")
-	view := path.Join("templates", file)
-
-	tpl, err := template.New("").Funcs(template.FuncMap{"ToString": ToString}).ParseFiles(base, header, footer, view)
-	if err != nil {
-		data = struct{ Msg string }{
-			Msg: fmt.Sprintf("%s: %s", "View not found", view),
-		}
-		view = path.Join("templates", "error.html")
-		tpl, _ = template.ParseFiles(base, header, footer, view)
-
-	}
-	tpl.ExecuteTemplate(w, "base", data)
 }
 
 func (app *App) connect(s string, h string, u string, p string) error {

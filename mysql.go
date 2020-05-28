@@ -36,16 +36,11 @@ func (m *Mysql) Databases() ([]string, error) {
 	return dblist, nil
 }
 
-// Tables return an array of table
+// Tables return an array of table of the given db
 func (m *Mysql) Tables(dbName string) ([]Table, error) {
 	dblist := []Table{}
-	_, err := m.DB().Exec("USE  information_schema")
 
-	if err != nil {
-		return nil, err
-	}
-	q := fmt.Sprintf("SELECT TABLE_NAME, ENGINE FROM information_schema.tables WHERE TABLE_SCHEMA =  '%s'", dbName)
-	rows, err := m.DB().Query(q)
+	rows, err := m.Query("information_schema", "SELECT TABLE_NAME, ENGINE FROM information_schema.tables WHERE TABLE_SCHEMA = ?", dbName)
 	if err != nil {
 		return nil, err
 	}
@@ -64,13 +59,7 @@ func (m *Mysql) Columns(dbName string, table string) ([]Column, error) {
 
 	columns := []Column{}
 
-	_, err := m.DB().Exec("Use " + dbName)
-
-	if err != nil {
-		return nil, err
-	}
-
-	rows, err := m.DB().Query("DESCRIBE " + table)
+	rows, err := m.Query(dbName, "DESCRIBE "+table)
 	if err != nil {
 		return nil, err
 	}
@@ -85,44 +74,48 @@ func (m *Mysql) Columns(dbName string, table string) ([]Column, error) {
 	return columns, nil
 }
 
-func (m *Mysql) Query(dbName string, query string) (Rows, error) {
-	// var rows []map[string]interface{}
-	rows := Rows{}
-	_, err := m.DB().Exec("Use " + dbName)
+func (m *Mysql) Query(dbName string, query string, args ...interface{}) (*sql.Rows, error) {
 
+	fmt.Println("query", query, args)
+	_, err := m.DB().Exec("Use " + dbName)
+	if err != nil {
+		return nil, err
+	}
+	stmt, err := m.DB().Prepare(query)
+	if err != nil {
+		return nil, err
+	}
+
+	return stmt.Query(args...)
+}
+
+func (m *Mysql) Data(dbName string, query string, args ...interface{}) (Rows, error) {
+	rows := Rows{}
+
+	r, err := m.Query(dbName, query, args...)
 	if err != nil {
 		return rows, err
 	}
 
-	r, err := m.DB().Query(query)
-	if err != nil {
-		panic(err)
-	}
-
 	cols, _ := r.Columns()
 	rows.Fields = cols
-	// Result is your slice string.
 	rawResult := make([][]byte, len(cols))
-	dest := make([]interface{}, len(cols)) // A temporary interface{} slice
-	for i, _ := range rawResult {
-		dest[i] = &rawResult[i] // Put pointers to each string in the interface slice
+	dest := make([]interface{}, len(cols))
+	for i := range rawResult {
+		dest[i] = &rawResult[i]
 	}
 	for r.Next() {
 		r.Scan(dest...)
 		rw := make([]string, len(cols))
 		for i, raw := range rawResult {
-
 			if raw == nil {
 				rw[i] = "null"
 			} else {
 				rw[i] = string(raw)
 			}
 		}
-		row := Row{
-			Values: rw,
-		}
+		row := rw
 		rows.Values = append(rows.Values, row)
-		fmt.Printf("ROW: %#v\n", rows)
 	}
 	return rows, nil
 }
